@@ -19,14 +19,15 @@ from ._mlir.passmanager import PassManager as mlir_pass_manager
 from .customize import customize
 from .ir.utils import get_global_vars
 from .backend.aie import AIEModule
+from .ir.types import Stream
 
 
 def get_pid():
     raise NotImplementedError("This function should be called in a kernel function.")
 
 
-def pipe():
-    raise NotImplementedError("This function should be called in a kernel function.")
+def pipe(dtype, shape, depth=2):
+    return Stream(dtype, shape, depth=depth)
 
 
 def move_stream_to_interface(func):
@@ -226,7 +227,7 @@ def build(funcs, target="vitis_hls", mode="csim", project="top.prj"):
         funcs = [funcs]
     with s_top.module.context, Location.unknown():
         for func in funcs:
-            global_vars = get_global_vars(func)
+            global_vars = get_global_vars(func, idx=4)
             mapping = func.mapping
             assert len(mapping) <= 2, "Only support 1D/2D mapping now."
             for dim in np.ndindex(*mapping):

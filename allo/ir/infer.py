@@ -703,8 +703,9 @@ class TypeInferer(ASTVisitor):
                     new_args = visit_stmts(ctx, node.args)
                     node.shape = tuple()
                     node.dtype = None
-                    node.func.value.shape = ctx.buffers[node.func.value.id].dtype.shape
-                    node.func.value.dtype = ctx.buffers[node.func.value.id].dtype.dtype
+                    pipe = ctx.global_vars[node.func.value.id]
+                    node.func.value.shape = pipe.shape
+                    node.func.value.dtype = pipe.dtype
                 elif node.func.attr == "get":
                     # return value
                     node.shape = ctx.buffers[node.func.value.id].dtype.shape

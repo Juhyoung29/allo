@@ -26,7 +26,7 @@ from .types import AlloType, Int, UInt, Fixed, UFixed, Index
 from .symbol_resolver import ASTResolver
 
 
-def _get_global_vars(_func):
+def _get_global_vars(_func, idx=3):
     if isinstance(_func, Callable):
         # Discussions: https://github.com/taichi-dev/taichi/issues/282
         global_vars = _func.__globals__.copy()
@@ -36,7 +36,7 @@ def _get_global_vars(_func):
     # Get back to the outer-most scope (user-defined function)
     # Mainly used to get the annotation definitions (shape and type),
     # which are probably not defined in __globals__
-    for name, var in inspect.stack()[3][0].f_locals.items():
+    for name, var in inspect.stack()[idx][0].f_locals.items():
         if isinstance(var, (int, float, AlloType)) or inspect.isfunction(var):
             global_vars[name] = var
 
@@ -50,13 +50,13 @@ def _get_global_vars(_func):
     return global_vars
 
 
-def get_global_vars(func):
-    global_vars = _get_global_vars(func)
+def get_global_vars(func, idx=3):
+    global_vars = _get_global_vars(func, idx=idx)
     new_global_vars = global_vars.copy()
     for var in global_vars.values():
         # import functions from other files
         if isinstance(var, PyFunctionType):
-            new_global_vars.update(_get_global_vars(var))
+            new_global_vars.update(_get_global_vars(var, idx=idx))
     return new_global_vars
 
 

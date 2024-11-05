@@ -10,10 +10,10 @@ import numpy as np
 Ty = float32
 M, N, K = 16, 16, 16
 
+pipe = df.pipe(dtype=Ty, shape=(M, N), depth=2)
 
 @df.kernel(mapping=[1])
 def producer(A: Ty[M, N]):
-    pipe: Stream[Ty] = df.pipe(src="producer", dst="consumer")
     for i, j in allo.grid(M, N):
         # load data
         out: Ty = A[i, j]
@@ -23,7 +23,6 @@ def producer(A: Ty[M, N]):
 
 @df.kernel(mapping=[1])
 def consumer(B: Ty[M, N]):
-    pipe: Stream[Ty] = df.pipe(src="producer", dst="consumer")
     for i, j in allo.grid(M, N):
         # receive data
         data = pipe.get()
